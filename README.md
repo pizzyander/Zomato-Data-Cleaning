@@ -1,4 +1,4 @@
-# Zomato-Data-Cleaning
+# Zomato-Dataset
 This project is focused on cleaning and analyzing datasets of restaurants that are registered on Zomato in Bengaluru City, India.  
 
 ## key tasks
@@ -10,20 +10,6 @@ This project is focused on cleaning and analyzing datasets of restaurants that a
 - Cleaning individual columns.
 - Remove the NaN values from the dataset
 
-### Data Visualization: 
-- Restaurants delivering Online or not.
-- Restaurants allowing table booking or not.
-- Table booking Rate vs Rate.
-- Best Location.
-- Relation between Location and Rating.
-- Restaurant Type.
-- Gaussian Rest type and Rating.
-- Types of Services.
-- Relation between Type and Rating.
-- Cost of Restaurant.
-- No. of restaurants in a Location.
-- Restaurant type.
-- Most famous restaurant chains in Bengaluru.
 
 ## install and load all relevant packages
 ```{R}
@@ -160,8 +146,4 @@ zomato %>%
 zomato %>%
   count(location) %>%
   arrange(desc(n))
-```
-
-```{R}
-
 ```
