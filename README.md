@@ -30,9 +30,11 @@ Let us take a glimpse at my data and see what it looks like.
 ## Data Cleaning  
 I will rename some columns to snake case. This is done as a standard practice.
 ```{R}
+#rename columns
 zomato$price_for_2 <- (zomato$approx_cost.for.two.people.)
 zomato$listed_in_type <- (zomato$listed_in.type.)
 zomato$listed_in_city <- (zomato$listed_in.city.)
+zomato$rating <- (zomato$rate)
 glimpse(zomato)
 ```
 
@@ -40,7 +42,7 @@ At this point, I have to delete redundant/unwanted columns to enable me have mor
 i also stored the resultant data in a variable named zomata. and that's what we'll be working with as we proceed.
 ```{R}
 zomata <- zomato %>%
-  select(-listed_in.city.,-listed_in.type.,-approx_cost.for.two.people.,-reviews_list,-menu_item)
+  select(-listed_in.city.,-listed_in.type.,-approx_cost.for.two.people.,-reviews_list,-menu_item, -rate)
 glimpse(zomata)
 ```
 ![Capture](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/394a0536-87b4-4dbf-a906-883c251a38ca)
@@ -58,47 +60,37 @@ character(0)
 
 changed the values in rate to ensure consistency and the column name to rating
 ```{R}
-zomato$rate <- sub("/5","", zomato$rate)
-zomato$rating <- (zomato$rate)
-zomata <- zomata %>%
-  select(-rating)
+zomata$rating <- sub("/5","", zomata$rating)
 glimpse(zomata)
 ```
 ![Capture](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/98d618b8-1ba7-4c4a-89eb-f84b397c9eeb)
 
-now i will drop all null observations from the dataframe.
-notice the change in the number of observations after dropping the null values.
+now i will drop all observations with null values from the dataframe.
+notice the change in the number of observations after dropping the null observations.
 ```{R}
-zomata <- filter(zomata, !is.na(url))
-zomata <- filter(zomata, !is.na(listed_in_city))
-zomata <- filter(zomata, !is.na(listed_in_type))
-zomata <- filter(zomata, !is.na(price_for_2))
-zomata <- filter(zomata, !is.na(cuisines))
-zomata <- filter(zomata, !is.na(dish_liked))
-zomata <- filter(zomata, !is.na(rest_type))
-zomata <- filter(zomata, !is.na(location()))
-zomata <- filter(zomata, !is.na(location))
-zomata <- filter(zomata, !is.na(phone))
-zomata <- filter(zomata, !is.na(votes))
-zomata <- filter(zomata, !is.na(book_table))
-zomata <- filter(zomata, !is.na(online_order))
-zomata <- filter(zomata, !is.na(name))
-zomata <- filter(zomata, !is.na(address))
+zomata <- na.omit(zomata)
+glimpse(zomata)
 ```
 
-changed the values of strings in online_order and book_table to enable format change.
+The "Yes" and "No" values in the online_order and book_table fields are supposed to be Logical instead of Character.
+Converting the fields directly to logical fields will result in null values. 
+So I have to change the "Yes" and "No" to "TRUE" and "FALSE". this would enable a valid conversion to logical field.
 ```{R}
 zomata$online_order <- str_replace(zomata$online_order, "Yes", "TRUE")
 zomata$online_order <- str_replace(zomata$online_order, "No", "FALSE")
 zomata$book_table <- str_replace(zomata$book_table, "No", "FALSE")
 zomata$book_table <- str_replace(zomata$book_table, "Yes", "TRUE")
+glimpse(zomata)
 ```
 
-change column format for book_table, online_order, rate
+change column type for book_table, online_order, rate
 ```{R}
-zomato$rate <- as.numeric(zomato$rate)
-zomato$book_table <- as.logical(zomato$book_table)
-zomato$online_order <- as.logical(zomato$online_order)
+#now I can convert from character to Logical values 
+zomata$book_table <- as.logical(zomata$book_table)
+zomata$online_order <- as.logical(zomata$online_order)
+zomata$rating <- as.numeric(zomata$rating)
+zomata$price_for_2 <- as.integer(zomata$price_for_2)
+glimpse(zomata)
 ```
 ## Data analysis and visualizations
 
