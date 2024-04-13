@@ -154,34 +154,57 @@ location_rating <- zomata %>%
   select("location", "rating","name") 
 arrange(location_rating, desc(rating))
 ```
-it shows that the restaurants in "Sarjapur Road" are the highest rated @ 4.9.
+it shows that the restaurants in "Sarjapur Road" are the highest rated @ 4.9  
 
+Now lets rate the dining types according to their popularity.
 ```{R}
-#listing the number of service type according to the most desired
-zomato %>%
+#counting the number of list_in_type
+zomata %>%
   count(listed_in_type) %>%
   arrange(desc(n))
 ```
-
+![Capture](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/e44570dd-d8fe-4994-9423-384dd9d52b49)
+rating each dinning type by their restaurant rating.
 ```{R}
-#listing the number of service type according to their rating
-zomato %>%
+##listing the service types according to their rating
+dinning_type_rating <- zomata %>%
   group_by(listed_in_type) %>%
   summarise(avg_rating = mean(rating)) %>%
   arrange(desc(avg_rating))
+dinning_type_rating
+glimpse(zomata)
 ```
+![Capture](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/d64cd444-0a60-4237-ba3b-f41d761f42f3)
 
+Now i will check the top 10 costliest restaurants.
 ```{R}
-#top 10 costliest restaurants on average (price for 2 guests)
-zomato %>%
+#top 10 costliest restaurants on average
+costliest_rest <- zomata %>%
   group_by(name) %>%
   summarise(avg_price = mean(price_for_2))%>%
   arrange(desc(avg_price))
+costliest_rest
 ```
-
+![Capture](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/4a0f9533-28af-44ad-b8d6-3b976649a15a)
+The code below is to count the number restaurants in every location
 ```{R}
 #number of restaurants in a location
-zomato %>%
+num_rest_location <- zomata %>%
   count(location) %>%
   arrange(desc(n))
+num_rest_location
 ```
+![Capture](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/0e69cd5c-6df9-427a-8313-7d6485540e3e)
+
+the code  below tells us the most popular restaurant in Sarjapur Road according to the votes given.
+```{R}
+#Most famous restaurant chains in Sarjapur Road.
+highest_voted_rest <- zomata %>%
+  group_by(name,location, rest_type) %>% 
+  summarize(sum_votes = sum(votes)) %>%
+  arrange(desc(sum_votes)) %>%
+  filter(location == "Sarjapur Road")
+highest_voted_rest
+```
+![Capture](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/97776846-dad2-425e-b04a-d2f388bb4df2)
+
