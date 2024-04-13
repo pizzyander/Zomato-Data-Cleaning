@@ -45,7 +45,7 @@ zomata <- zomato %>%
   select(-listed_in.city.,-listed_in.type.,-approx_cost.for.two.people.,-reviews_list,-menu_item, -rate)
 glimpse(zomata)
 ```
-![Capture](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/394a0536-87b4-4dbf-a906-883c251a38ca)
+
 
 My next task will be to eliminate all the null observations from the dataset. 
 note: we are using the url column as our unique values in this task. we are sure that no 2 url can be thesame.  
@@ -63,7 +63,6 @@ changed the values in rate to ensure consistency and the column name to rating
 zomata$rating <- sub("/5","", zomata$rating)
 glimpse(zomata)
 ```
-![Capture](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/98d618b8-1ba7-4c4a-89eb-f84b397c9eeb)
 
 now i will drop all observations with null values from the dataframe.
 notice the change in the number of observations after dropping the null observations.
@@ -72,7 +71,7 @@ zomata <- na.omit(zomata)
 glimpse(zomata)
 ```
 
-The "Yes" and "No" values in the online_order and book_table fields are supposed to be Logical instead of Character.
+The "Yes" and "No" values in the online_order and book_table fields are supposed to be Logical instead of Character format.
 Converting the fields directly to logical fields will result in null values. 
 So I have to change the "Yes" and "No" to "TRUE" and "FALSE". this would enable a valid conversion to logical field.
 ```{R}
@@ -83,7 +82,7 @@ zomata$book_table <- str_replace(zomata$book_table, "Yes", "TRUE")
 glimpse(zomata)
 ```
 
-change column type for book_table, online_order, rate
+At this point, I can convert some colunms to their appropriate formats.
 ```{R}
 #now I can convert from character to Logical values 
 zomata$book_table <- as.logical(zomata$book_table)
@@ -93,49 +92,69 @@ zomata$price_for_2 <- as.integer(zomata$price_for_2)
 glimpse(zomata)
 ```
 ## Data analysis and visualizations
-
+Let us check the distribution of the numeric data in the dataframe.   
+This would enable us to identify skews and outliers.
 ```{R}
-#counting the number of online orders
-zomato %>%
+#Now i will plot a histogram and boxplot to check their distribution of the numeric fields in the dataframe.
+hist(zomata$rating)
+hist(zomata$price_for_2)
+boxplot(zomata$rating, main="rating_boxplot",ylab="rating")
+boxplot(zomata$price_for_2, main="price_for_2_boxplot",ylab="price_for_2")
+```
+![Rplot](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/46abb787-ac41-42c5-b26e-ea9769054c78)
+
+![Rplot01](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/7915ae6e-55ef-44f7-b52f-a75693169152)
+The rating histogram shows an even distribution with 3.7 as the hightest number of rating.  
+
+
+Let us count the number of restaurants that allow customers order items online.
+```{R}
+#counting the number of retsaurants that allow customers to order items online
+zomata %>%
   count(online_order)
 
-# geom_bar plot to count the number of restaurants that deliver online  
-ggplot(data = zomato) +
+# visual count of restaurants that allow customers to order items online
+ggplot(data = zomata) +
   geom_bar(mapping= aes(x=online_order), fill = "red") +
   labs(title = "restaurants that take online order")
 ```
-![online delivers](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/b4e51127-4083-4a79-9630-d44c95b792bc)
+According to the bar plot below, about ~31,000 restaurants allow online orders, that is more than the ones that dont allow online orders(~20,000).
+![Rplot03](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/eee64992-aeec-4ab0-ae7f-cb2486bcb2ca)  
 
-
+Now we can count the number of restaurants that allow booking tables.
 ```{R}
-# visual count of restaurants that allow booking
-ggplot(data = zomato) +
+#counting the number of restaurants that allow booking tables upfront
+zomata %>%
+  count(book_table)
+
+# visual bar plot of restaurants that allow booking
+ggplot(data = zomata) +
   geom_bar(mapping= aes(x=book_table), fill = "violet") +
   labs(title = "restaurants that allow booking")
 ```
-![restaurants that allow booking](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/c584a7f6-76ea-4bef-9ca8-38faddf495bb)
+![Rplot05](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/4e02baa5-f820-4b44-b93e-5191f099d9f0)
+According to the bar plot above, there are far more walk-in retaurants than restaurants that allow booking.  
 
+
+let's check for the relationship between the numeric data in the dataframe
 ```{R}
-#best location by to rating.
-location_rating <- zomato %>%
+#point plot of price_for_2 and votes
+ggplot(data = zomata) +
+  geom_point(mapping= aes(x = price_for_2, y = votes), color = "blue") +
+  labs(title = "price_for 2 X votes")
+```
+![Rplot06](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/e3d002fd-113f-4826-866f-ed6c88ab5635)
+
+## Analysis
+
+lets check the best location for restaurants by rating
+```{R}
+#best location by total rating.
+location_rating <- zomata %>%
   select("location", "rating","name") 
 arrange(location_rating, desc(rating))
 ```
-
-```{R}
-#best restaurant location by average rating
-avg_rating_table <- location_rating %>% 
-  group_by(location) %>%
-  summarise(avg_rating = mean(rating)) %>%
-  arrange(desc(avg_rating))
-avg_rating_table
-```
-
-```{R}
-#unique restaurant types
-unique(zomato$rest_type)
-```
-![Capture](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/55c7b99f-5616-4aa7-9904-8b4de1aa8cd4)
+it shows that the restaurants in "Sarjapur Road" are the highest rated @ 4.9.
 
 ```{R}
 #listing the number of service type according to the most desired
@@ -143,7 +162,6 @@ zomato %>%
   count(listed_in_type) %>%
   arrange(desc(n))
 ```
-![Capture](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/18c055c6-f293-4fbe-b71c-11aec144e825)
 
 ```{R}
 #listing the number of service type according to their rating
@@ -152,7 +170,6 @@ zomato %>%
   summarise(avg_rating = mean(rating)) %>%
   arrange(desc(avg_rating))
 ```
-![Capture](https://github.com/pizzyander/Zomato-Data-Cleaning/assets/141561016/650666ea-6253-4aa3-b123-d2984c747430)
 
 ```{R}
 #top 10 costliest restaurants on average (price for 2 guests)
