@@ -1,4 +1,4 @@
-# Zomato-Dataset
+# Zomato Dataset Analysis
 This project is focused on cleaning and analyzing datasets of restaurants that are registered on Zomato in Bengaluru City, India.  
 
 ## key tasks
